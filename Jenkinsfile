@@ -11,10 +11,9 @@ pipeline {
                 bat 'npm install'
             }
         }
-       stage('Run Tests') {
+      stage('Run Tests') {
             steps {
                 withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
-                    bat 'npx snyk auth %SNYK_TOKEN%'
                     bat 'npm test || exit /b 0'
                 }
             }
