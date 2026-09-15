@@ -13,12 +13,15 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                bat 'npm test || exit /b 0'
+                withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
+                    bat 'snyk auth %SNYK_TOKEN%'
+                    bat 'npm test || exit /b 0'
+                }
             }
         }
         stage('Generate Coverage Report') {
             steps {
-                bat 'npm run coverage || exit /b 0'
+                bat 'npx nyc --reporter=lcov --report-dir=coverage mocha || exit /b 0'
             }
         }
         stage('NPM Audit (Security Scan)') {
@@ -26,13 +29,13 @@ pipeline {
                 bat 'npm audit || exit /b 0'
             }
         }
-       stage('SonarCloud Analysis') {
-    steps {
-        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-            bat 'npm install --save-dev sonarqube-scanner'
-            bat 'npx sonar-scanner -Dsonar.login=%SONAR_TOKEN%'
+        stage('SonarCloud Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    bat 'npm install --save-dev sonarqube-scanner'
+                    bat 'npx sonar-scanner -Dsonar.login=%SONAR_TOKEN%'
+                }
+            }
         }
-    }
-}
     }
 }
