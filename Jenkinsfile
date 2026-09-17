@@ -8,10 +8,12 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
+                bat 'if exist node_modules rmdir /s /q node_modules'
+                bat 'if exist package-lock.json del /f /q package-lock.json'
                 bat 'npm install'
             }
         }
-      stage('Run Tests') {
+        stage('Run Tests') {
             steps {
                 withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
                     bat 'npm test || exit /b 0'
